@@ -1,7 +1,6 @@
 
-# compare climatological maps from various source using the PRISM DEM domain
+# compare climatological maps from various source using the BC PRISM DEM domain
 # Colin Mahony 
-# Dec. 27, 2023
 
 library(terra)
 library(data.table)
@@ -90,13 +89,23 @@ dir <- "//objectstore2.nrs.bcgov/ffec/Climatologies/ANUSPLIN/mly60arcsecond_1981
 anusplin <- rast(paste(dir, list.files(dir, pattern=paste(c("mint60", "maxt60", "pcp60")[e],"_", monthcodes[m], ".tif", sep="")), sep=""))
 anusplin <- prep(anusplin, studyarea=dem.bc, element=elements[e], breaks=breaks)
 
+# load the USask WRF data for the variable
+dir <- "//objectstore2.nrs.bcgov/ffec/Climatologies/USask_WRF/daily_lat_lon/"
+dem.usask <- rast("//objectstore2.nrs.bcgov/ffec/Climatologies/USask_WRF/HGT.latlon.tif")
+wrfUsask <- rast(paste(dir, "wrf_usak_daily_dt_tmin_2001.nc", sep=""))[[1]]
+# wrfUsask <- rast(paste(dir, list.files(dir, pattern=paste(c("tmin", "tmax", "prcp")[e], monthcodes[m], ".asc", sep="")), sep=""))
+wrfUsask <- prep(wrfUsask, studyarea=dem.bc, element=elements[e], breaks=breaks)
+
+
+
+
 # leaflet map
 labels <- paste(stn.info$Name, "(El. ", stn.info$Elevation, "m)", sep="")
 map <- leaflet(stn.info) %>%
   addTiles(group = "basemap") %>%
   addProviderTiles('Esri.WorldImagery', group = "sat photo") %>%
   # addRasterImage(dem, colors =terrain.colors(99), opacity = 1, maxBytes = 6 * 1024 * 1024, group = "elevation") %>%
-  addRasterImage(composite, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "Composite") %>%
+  # addRasterImage(dem.usask, colors =terrain.colors(99), opacity = 1, maxBytes = 6 * 1024 * 1024, group = "elevation") %>%
   addRasterImage(prism.bc, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "BC PRISM") %>%
   addRasterImage(prism.canw, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "W. Can. PRISM") %>%
   addRasterImage(daymet, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "Daymet") %>%
@@ -104,11 +113,41 @@ map <- leaflet(stn.info) %>%
   addRasterImage(worldclim, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "WorldClim (1971-2000)") %>%
   addRasterImage(anusplin, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "ANUSPLIN") %>%
   # addRasterImage(climatena, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "ClimateNA") %>%
+  addRasterImage(wrfUsask, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "WRF (USask)") %>%
   addCircleMarkers(lng = ~Long, lat = ~Lat, color="black", fillColor = ~ ColPal(stn.data), opacity = 1, fillOpacity = 1, popup = labels, radius=6, weight=2, group = "Stations") %>%
   addLayersControl(
     baseGroups = c("basemap", "sat photo"),
-    overlayGroups = c("ANUSPLIN", "WorldClim (1971-2000)", "CHELSA", "Daymet", "W. Can. PRISM", "BC PRISM", "Stations"),
+    overlayGroups = c("WRF (USask)", "ANUSPLIN", "WorldClim (1971-2000)", "CHELSA", "Daymet", "W. Can. PRISM", "BC PRISM", "Stations"),
     options = layersControlOptions(collapsed = FALSE)
   )
 map
+
+# leaflet map (basics)
+labels <- paste(stn.info$Name, "(El. ", stn.info$Elevation, "m)", sep="")
+map <- leaflet(stn.info) %>%
+  addTiles(group = "basemap") %>%
+  addProviderTiles('Esri.WorldImagery', group = "sat photo") %>%
+  addRasterImage(prism.bc, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "BC PRISM") %>%
+  addRasterImage(wrfUsask, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "WRF (USask)") %>%
+  addCircleMarkers(lng = ~Long, lat = ~Lat, color="black", fillColor = ~ ColPal(stn.data), opacity = 1, fillOpacity = 1, popup = labels, radius=6, weight=2, group = "Stations") %>%
+  addLayersControl(
+    baseGroups = c("basemap", "sat photo"),
+    overlayGroups = c("WRF (USask)", "BC PRISM", "Stations"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+map
+
+# leaflet map (elevation)
+map <- leaflet() %>%
+  addTiles(group = "basemap") %>%
+  addProviderTiles('Esri.WorldImagery', group = "sat photo") %>%
+  addRasterImage(dem.bc, colors =terrain.colors(99), opacity = 1, maxBytes = 6 * 1024 * 1024, group = "BC PRISM") %>%
+  addRasterImage(dem.usask, colors =terrain.colors(99), opacity = 1, maxBytes = 6 * 1024 * 1024, group = "WRF (USask)") %>%
+  addLayersControl(
+    baseGroups = c("basemap", "sat photo"),
+    overlayGroups = c("WRF (USask)", "BC PRISM"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+map
+
 
