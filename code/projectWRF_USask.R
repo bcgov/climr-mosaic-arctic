@@ -51,7 +51,7 @@ writeRaster(dem.latlon, "//objectstore2.nrs.bcgov/ffec/Climatologies/USask_WRF/H
 test <- raster("//objectstore2.nrs.bcgov/ffec/Climatologies/USask_WRF/wrf_tmin_sample_dt.nc")
 crs(test) <- crs.usask
 extent(test) <- extent.usask
-test.latlon <- projectRaster(test, crs="EPSG:4326")
+test.latlon <- projectRaster(test, crs="EPSG:4326", res = 0.02)
 plot(test.latlon)
 
 
