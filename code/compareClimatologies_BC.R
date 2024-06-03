@@ -21,6 +21,7 @@ prep <- function(x, studyarea, element, breaks){
 
 monthcodes <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12")
 elements <- c("Tmin", "Tmax", "Pr")
+month.abb.lowercase <- c("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
 
 e <- 1
 m <- 1
@@ -90,13 +91,10 @@ anusplin <- rast(paste(dir, list.files(dir, pattern=paste(c("mint60", "maxt60", 
 anusplin <- prep(anusplin, studyarea=dem.bc, element=elements[e], breaks=breaks)
 
 # load the USask WRF data for the variable
-dir <- "//objectstore2.nrs.bcgov/ffec/Climatologies/USask_WRF/daily_lat_lon/"
-dem.usask <- rast("//objectstore2.nrs.bcgov/ffec/Climatologies/USask_WRF/HGT.latlon.tif")
-wrfUsask <- rast(paste(dir, "wrf_usak_daily_dt_tmin_2001.nc", sep=""))[[1]]
-# wrfUsask <- rast(paste(dir, list.files(dir, pattern=paste(c("tmin", "tmax", "prcp")[e], monthcodes[m], ".asc", sep="")), sep=""))
+dir <- "//objectstore2.nrs.bcgov/ffec/Climatologies/USask_WRF/monthly_clim_regridded/"
+dem.usask <- rast(paste(dir, "HGT/HGT_regrid.nc", sep=""))
+wrfUsask <- rast(paste(dir, list.files(dir, pattern=paste(month.abb.lowercase[m], c("tmin", "tmax", "prec")[e], sep="_")), sep=""))
 wrfUsask <- prep(wrfUsask, studyarea=dem.bc, element=elements[e], breaks=breaks)
-
-
 
 
 # leaflet map
