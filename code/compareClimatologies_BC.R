@@ -23,7 +23,7 @@ monthcodes <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11"
 elements <- c("Tmin", "Tmax", "Pr")
 month.abb.lowercase <- c("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
 
-e <- 1
+e <- 2
 m <- 1
 
 # load the source STATION data for the BC prism
@@ -93,7 +93,7 @@ anusplin <- prep(anusplin, studyarea=dem.bc, element=elements[e], breaks=breaks)
 # load the USask WRF data for the variable
 dir <- "//objectstore2.nrs.bcgov/ffec/Climatologies/USask_WRF/monthly_clim_regridded/"
 dem.usask <- rast(paste(dir, "HGT/HGT_regrid.nc", sep=""))
-wrfUsask <- rast(paste(dir, list.files(dir, pattern=paste(month.abb.lowercase[m], c("tmin", "tmax", "prec")[e], sep="_")), sep=""))
+wrfUsask <- rast(paste0(dir, paste(c("tmin", "tmax", "prec")[e], monthcodes[m], "regrid.nc", sep="_")))
 wrfUsask <- prep(wrfUsask, studyarea=dem.bc, element=elements[e], breaks=breaks)
 
 
@@ -119,33 +119,33 @@ map <- leaflet(stn.info) %>%
     options = layersControlOptions(collapsed = FALSE)
   )
 map
-
-# leaflet map (basics)
-labels <- paste(stn.info$Name, "(El. ", stn.info$Elevation, "m)", sep="")
-map <- leaflet(stn.info) %>%
-  addTiles(group = "basemap") %>%
-  addProviderTiles('Esri.WorldImagery', group = "sat photo") %>%
-  addRasterImage(prism.bc, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "BC PRISM") %>%
-  addRasterImage(wrfUsask, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "WRF (USask)") %>%
-  addCircleMarkers(lng = ~Long, lat = ~Lat, color="black", fillColor = ~ ColPal(stn.data), opacity = 1, fillOpacity = 1, popup = labels, radius=6, weight=2, group = "Stations") %>%
-  addLayersControl(
-    baseGroups = c("basemap", "sat photo"),
-    overlayGroups = c("WRF (USask)", "BC PRISM", "Stations"),
-    options = layersControlOptions(collapsed = FALSE)
-  )
-map
-
-# leaflet map (elevation)
-map <- leaflet() %>%
-  addTiles(group = "basemap") %>%
-  addProviderTiles('Esri.WorldImagery', group = "sat photo") %>%
-  addRasterImage(dem.bc, colors =terrain.colors(99), opacity = 1, maxBytes = 6 * 1024 * 1024, group = "BC PRISM") %>%
-  addRasterImage(dem.usask, colors =terrain.colors(99), opacity = 1, maxBytes = 6 * 1024 * 1024, group = "WRF (USask)") %>%
-  addLayersControl(
-    baseGroups = c("basemap", "sat photo"),
-    overlayGroups = c("WRF (USask)", "BC PRISM"),
-    options = layersControlOptions(collapsed = FALSE)
-  )
-map
+# 
+# # leaflet map (basics)
+# labels <- paste(stn.info$Name, "(El. ", stn.info$Elevation, "m)", sep="")
+# map <- leaflet(stn.info) %>%
+#   addTiles(group = "basemap") %>%
+#   addProviderTiles('Esri.WorldImagery', group = "sat photo") %>%
+#   addRasterImage(prism.bc, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "BC PRISM") %>%
+#   addRasterImage(wrfUsask, colors = ColPal.raster, opacity = 1, maxBytes = 7 * 1024 * 1024, group = "WRF (USask)") %>%
+#   addCircleMarkers(lng = ~Long, lat = ~Lat, color="black", fillColor = ~ ColPal(stn.data), opacity = 1, fillOpacity = 1, popup = labels, radius=6, weight=2, group = "Stations") %>%
+#   addLayersControl(
+#     baseGroups = c("basemap", "sat photo"),
+#     overlayGroups = c("WRF (USask)", "BC PRISM", "Stations"),
+#     options = layersControlOptions(collapsed = FALSE)
+#   )
+# map
+# 
+# # leaflet map (elevation)
+# map <- leaflet() %>%
+#   addTiles(group = "basemap") %>%
+#   addProviderTiles('Esri.WorldImagery', group = "sat photo") %>%
+#   addRasterImage(dem.bc, colors =terrain.colors(99), opacity = 1, maxBytes = 6 * 1024 * 1024, group = "BC PRISM") %>%
+#   addRasterImage(dem.usask, colors =terrain.colors(99), opacity = 1, maxBytes = 6 * 1024 * 1024, group = "WRF (USask)") %>%
+#   addLayersControl(
+#     baseGroups = c("basemap", "sat photo"),
+#     overlayGroups = c("WRF (USask)", "BC PRISM"),
+#     options = layersControlOptions(collapsed = FALSE)
+#   )
+# map
 
 
